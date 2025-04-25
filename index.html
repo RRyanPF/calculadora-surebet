@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Calculadora de Surebet Profissional</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f5f7fa;
+      margin: 0;
+      padding: 20px;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      min-height: 100vh;
+    }
+
+    .container {
+      background: #ffffff;
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+      width: 100%;
+      max-width: 500px;
+    }
+
+    h1 {
+      text-align: center;
+      color: #333;
+      margin-bottom: 20px;
+    }
+
+    label {
+      display: block;
+      margin-top: 15px;
+      font-weight: bold;
+      color: #555;
+    }
+
+    input, select {
+      width: 100%;
+      padding: 10px;
+      margin-top: 5px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      box-sizing: border-box;
+    }
+
+    button, .link-button {
+      width: 100%;
+      margin-top: 15px;
+      padding: 12px;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      font-size: 16px;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-block;
+      text-align: center;
+    }
+
+    button:hover, .link-button:hover {
+      background-color: #45a049;
+    }
+
+    .resultados {
+      margin-top: 25px;
+      background: #f1f8f5;
+      padding: 20px;
+      border-radius: 5px;
+      display: none;
+    }
+
+    .alerta {
+      margin-top: 15px;
+      font-weight: bold;
+      color: #d9534f;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Calculadora de Surebet</h1>
+
+    <label for="tipo">Escolha o tipo de aposta:</label>
+    <select id="tipo" onchange="atualizarCampos()">
+      <option value="2">2 Resultados</option>
+      <option value="3">3 Resultados</option>
+    </select>
+
+    <div id="inputs">
+      <label for="oddA">Odd A:</label>
+      <input type="number" id="oddA" step="0.01">
+
+      <label for="oddB">Odd B:</label>
+      <input type="number" id="oddB" step="0.01">
+    </div>
+
+    <label for="investimento">Investimento Total (R$):</label>
+    <input type="number" id="investimento" step="0.01">
+
+    <button onclick="calcular()">Calcular</button>
+
+    <div class="alerta" id="alerta"></div>
+
+    <div class="resultados" id="resultados">
+      <p id="apostaA"></p>
+      <p id="apostaB"></p>
+      <p id="apostaC"></p>
+      <p id="lucro"></p>
+      <p id="roi"></p>
+    </div>
+
+    <a href="https://www.betano.com" target="_blank" class="link-button">Ir para a Betano</a>
+    <a href="https://www.bet365.com" target="_blank" class="link-button">Ir para a Bet365</a>
+  </div>
+
+  <script>
+    function atualizarCampos() {
+      const tipo = document.getElementById('tipo').value;
+      const inputs = document.getElementById('inputs');
+      inputs.innerHTML = `
+        <label for="oddA">Odd A:</label>
+        <input type="number" id="oddA" step="0.01">
+
+        <label for="oddB">Odd B:</label>
+        <input type="number" id="oddB" step="0.01">
+      `;
+
+      if (tipo === "3") {
+        inputs.innerHTML += `
+          <label for="oddC">Odd C:</label>
+          <input type="number" id="oddC" step="0.01">
+        `;
+      }
+    }
+
+    function calcular() {
+      const tipo = document.getElementById('tipo').value;
+      const oddA = parseFloat(document.getElementById('oddA').value);
+      const oddB = parseFloat(document.getElementById('oddB').value);
+      const investimento = parseFloat(document.getElementById('investimento').value);
+      const oddC = tipo === "3" ? parseFloat(document.getElementById('oddC').value) : null;
+
+      let somaFrações = 1 / oddA + 1 / oddB;
+      if (tipo === "3") somaFrações += 1 / oddC;
+
+      const surebetPercentual = somaFrações * 100;
+      const alerta = document.getElementById('alerta');
+      const resultados = document.getElementById('resultados');
+
+      if (surebetPercentual >= 100) {
+        alerta.innerText = "Não existe Surebet.";
+        resultados.style.display = 'none';
+        return;
+      } else {
+        alerta.innerText = "Surebet Confirmada!";
+      }
+
+      const valorA = investimento * (1 / oddA) / somaFrações;
+      const valorB = investimento * (1 / oddB) / somaFrações;
+      let valorC = 0;
+      if (tipo === "3") {
+        valorC = investimento * (1 / oddC) / somaFrações;
+      }
+
+      const retorno = tipo === "2" 
+        ? Math.min(valorA * oddA, valorB * oddB)
+        : Math.min(valorA * oddA, valorB * oddB, valorC * oddC);
+
+      const lucro = retorno - investimento;
+      const roi = (lucro / investimento) * 100;
+
+      document.getElementById('apostaA').innerText = `Valor para Odd A: R$ ${valorA.toFixed(2)}`;
+      document.getElementById('apostaB').innerText = `Valor para Odd B: R$ ${valorB.toFixed(2)}`;
+      document.getElementById('apostaC').innerText = tipo === "3" ? `Valor para Odd C: R$ ${valorC.toFixed(2)}` : '';
+      document.getElementById('lucro').innerText = `Lucro Garantido: R$ ${lucro.toFixed(2)}`;
+      document.getElementById('roi').innerText = `ROI: ${roi.toFixed(2)}%`;
+
+      resultados.style.display = 'block';
+    }
+  </script>
+</body>
+</html>
